@@ -135,6 +135,7 @@ if __name__ == '__main__':
     C2 = tb2.comparisson(tb1, tb3)
     
     #Rever a ordem que os resultados estão surgindo.
+    #linha adicionada pra teste.
         
         
         
