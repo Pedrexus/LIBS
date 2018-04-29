@@ -6,6 +6,7 @@ Created on Fri Apr 20 17:12:56 2018
 """
 import requests
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 import collections
 import re
@@ -18,6 +19,11 @@ def remove_non_ascii(string):
         else: pass
     
     return ''.join(new_string)
+
+def is_number(string):
+    try:               float(string)
+    except ValueError: return False
+    return True
 
 class Constants:
     
@@ -103,7 +109,11 @@ class NIST( Constants ):
                         data['Acc.'], self.uncertainty_dict)
         except: pass
     
-        self.__convert_to_number(data)
+        try:    self.__convert_to_number(data)
+        except: pass
+    
+        try:    self.__fill_with_zero(data)
+        except: pass
         
         return data
                         
@@ -147,17 +157,20 @@ class NIST( Constants ):
             for i in data[col]:
                 value = re.findall( r'[-+]?\d*\.\d+|\d+', i)
                 if len(value) == 0: value = ['0']
-                values.append(value[0])
+                values.append(float(value[0]))
             data[col] = values
-    
+    @staticmethod
+    def __fill_with_zero(data):
+        col = 'gkAki\xa0(108 s-1)'
+        values = [float(i)  if is_number(i) else 0 for i in data[col]]
+        data[col] = values
+        
     def __repr__(self):
         print(self.table)
                             
 if __name__ == '__main__':
-    A = NIST(elements = ['C I', 'B I'], conf_out = False, upp_w = 1000)                    
-        
-        
-        
+    A = NIST(elements = ['C I', 'B I'], conf_out = False, upp_w = 1000,
+             line_out = 3)                    
         
         
         
