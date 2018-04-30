@@ -9,6 +9,7 @@ import os, os.path, glob
 import numpy as np
 import pandas as pd
 import peakutils as pu
+import nist
 
 class Tablet:
     
@@ -107,13 +108,18 @@ class Tablet:
 
         return self.spectrum.loc[spta_peaks].corr()
     
-    def comparisson(self, *Tablets, **kwargs):
+    def comparisson(self, full_output = False, *Tablets, **kwargs):
         peaks_indexes, spta_peaks = self.peaks_in_spectra(self.avg_spectra,
                                                           **kwargs)
-        out_sptm = [s.avg_spectra.loc[spta_peaks] for s in [*Tablets, self]]
+        out_sptm = [s.avg_spectra.loc[spta_peaks] for s in [self, *Tablets]]
         total_sptm = pd.concat(out_sptm, axis = 1)
         
-        return total_sptm.corr()
+        corr_matrix = total_sptm.corr()
+        if full_output: 
+            return corr_matrix
+        else:   
+            corrs = np.array(corr_matrix[0][1:])
+            return corrs
         
 
 if __name__ == '__main__':
@@ -125,17 +131,15 @@ if __name__ == '__main__':
     
     path3 = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\Fase 3\data\23'
     tb3 = Tablet(path3)
-    
-    C1 = tb2.comparisson(tb1, tb3)
             
     tb1.drop_outliers(reference = tb1.avg_spectra)
     tb2.drop_outliers(reference = tb2.avg_spectra)
     tb3.drop_outliers(reference = tb3.avg_spectra)
-
-    C2 = tb2.comparisson(tb1, tb3)
     
-    #Rever a ordem que os resultados estão surgindo.
-    #linha adicionada pra teste.
+    C1 = tb2.comparisson(tb1)
+    C2 = tb2.comparisson(tb3)
+    C_all = tb2.comparisson(tb1, tb3)
+
         
         
         
