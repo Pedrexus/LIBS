@@ -42,7 +42,7 @@ class Tablet:
         return step, new_spectms, new_spectrum
     
     
-    def peak_possibilites(self, db_table, N = 1, **kwargs):
+    def peak_possibilites(self, db_table, N = 1, ret_unknown = True, **kwargs):
         step, new_spectms, new_spectrum = self.interpolate(N)
         unc_delta = N*step
                  
@@ -59,9 +59,11 @@ class Tablet:
         for peak in sptm_unique_peaks:
             if any(np.abs(db_wl - peak) < unc_delta):
                 possibilities = np.where(np.abs(db_wl - peak) < unc_delta)[0]
-                db_pblty[peak] = np.unique(db_ion[possibilities])
+                unq = np.unique(db_ion[possibilities])
+                db_pblty[peak] = tuple(unq)
             else:
-                db_pblty[peak] = 'UNKNOWN'
+                if ret_unknown: db_pblty[peak] = 'UNKNOWN'
+                else:           pass
         
         pblty_df = pd.Series(db_pblty, name = 'peak possibilities')
         
@@ -194,6 +196,9 @@ class Tablet:
         
 
 if __name__ == '__main__':
+    import time
+    start = time.time()
+    
     path1 = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\Fase 3\data\1'
     tb1 = Tablet(path1)
     
@@ -211,7 +216,8 @@ if __name__ == '__main__':
     C2 = tb2.comparisson(tb3)
     C_all = tb2.comparisson(tb1, tb3)
     
-    db = nist.NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I'], conf_out = False, upp_w = 1000,
+    db = nist.NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
+                               'Al I', 'Fe I', 'Ti I', 'Na I', 'Ca I', 'Zn I'], conf_out = False, upp_w = 1000,
                  line_out = 3, g_out = False)   
     
     #É importante notar que um mesmo pico será contado mas de uma vez, pois,
@@ -219,12 +225,12 @@ if __name__ == '__main__':
     #como um ponto, mas equivale ao mesmo pico efetivamente. Apesar disso, não 
     #tem um erro acontecendo, confira fazendo n_picos/n_pontos do espectro.
 
-    psbty1_count = tb1.peak_possibilites(db.table, N = 1)
+    psbty1 = tb1.peak_possibilites(db.table, N = 1, ret_unknown = 0)
+    psbty1_count = psbty1.value_counts(normalize = True)
     
-    #Contudo, está ocorrendo um erro quando um pico disputado por dois ou mais 
-    #picos em que value_counts conta cad aocorrência como algo único.
-
-        
+    
+    end = time.time()
+    total_time = end - start#N = 5: 90s, N = 1: 43s.
         
         
         
