@@ -9,20 +9,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import collections
 import re
-
-def remove_non_ascii(string):
-    new_string = []
-    for i in string:
-        if ord(i) < 128:
-             new_string.append(i)
-        else: pass
-    
-    return ''.join(new_string)
-
-def is_number(string):
-    try:               float(string)
-    except ValueError: return False
-    return True
+from extra_functions import remove_non_ascii, is_number
 
 class Constants:
     
@@ -101,7 +88,7 @@ class NIST( Constants ):
     def data(self): 
         data = pd.DataFrame(self.organize_data())
         
-        try:    data = self.__drop_empty_cols(data)
+        try:    self.__drop_empty_cols(data)
         except: pass
     
         try:    data['Acc.'] = self.__translate_uncertainty(
@@ -145,13 +132,15 @@ class NIST( Constants ):
     
     @staticmethod
     def __drop_empty_cols(data):
-        return data.drop(['', '-'], axis = 1)
+        data.drop([''], axis = 1, inplace = True)
+        data.drop(['-'], axis = 1, inplace = True) 
     @staticmethod
     def __translate_uncertainty(data, dictionary):
         return [dictionary[key] for key in map(remove_non_ascii, data)]
     @staticmethod
     def __convert_to_number(data):
-        for col in ['Ei\xa0\xa0(eV)', 'Ek\xa0\xa0(eV)', 'Rel.\xa0\xa0Int.']:
+        for col in ['Ei\xa0\xa0(eV)', 'Ek\xa0\xa0(eV)', 'Rel.\xa0\xa0Int.',
+                    'Observed\xa0\xa0Wavelength\xa0\xa0Air (nm)']:
             values = []
             for i in data[col]:
                 value = re.findall( r'[-+]?\d*\.\d+|\d+', i)
