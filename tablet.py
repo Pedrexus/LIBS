@@ -9,7 +9,6 @@ import os, os.path, glob
 import numpy as np
 import pandas as pd
 import peakutils as pu
-import nist
 from scipy.interpolate import CubicSpline
 from extra_functions import magnitude
 
@@ -46,8 +45,8 @@ class Tablet:
         step, new_spectms, new_spectrum = self.interpolate(N)
         unc_delta = N*step
                  
-        *_, db_wl  = self.__get_from_db(db.table, keyword = 'wavelength')
-        *_, db_ion = self.__get_from_db(db.table, keyword = 'ion')
+        *_, db_wl  = self.__get_from_db(db_table, keyword = 'wavelength')
+        *_, db_ion = self.__get_from_db(db_table, keyword = 'ion')
         
         db_wl = db_wl.round(- magnitude(unc_delta))
         
@@ -81,7 +80,8 @@ class Tablet:
         sptum_amount = len(similarity_matrix)
         votes_amount = sptum_amount*pct_votes
         
-        outliers = np.where((matrix_count <= votes_amount) == True)[0]
+        outliers_idx = np.where((matrix_count <= votes_amount) == True)[0]
+        outliers = similarity_matrix.columns[outliers_idx]
         
         if not inliers: return outliers
         elif inliers:   return matrix_count.index.drop(outliers)
@@ -196,41 +196,7 @@ class Tablet:
         
 
 if __name__ == '__main__':
-    import time
-    start = time.time()
-    
-    path1 = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\Fase 3\data\1'
-    tb1 = Tablet(path1)
-    
-    path2 = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\Fase 3\data\18'
-    tb2 = Tablet(path2)
-    
-    path3 = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\Fase 3\data\23'
-    tb3 = Tablet(path3)
-            
-    tb1.drop_outliers(reference = tb1.avg_spectra)
-    tb2.drop_outliers(reference = tb2.avg_spectra)
-    tb3.drop_outliers(reference = tb3.avg_spectra)
-    
-    C1 = tb2.comparisson(tb1)
-    C2 = tb2.comparisson(tb3)
-    C_all = tb2.comparisson(tb1, tb3)
-    
-    db = nist.NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
-                               'Al I', 'Fe I', 'Ti I', 'Na I', 'Ca I', 'Zn I'], conf_out = False, upp_w = 1000,
-                 line_out = 3, g_out = False)   
-    
-    #É importante notar que um mesmo pico será contado mas de uma vez, pois,
-    #como ele "anda" ao longo das amostras, ele aparece como um intervalo e não
-    #como um ponto, mas equivale ao mesmo pico efetivamente. Apesar disso, não 
-    #tem um erro acontecendo, confira fazendo n_picos/n_pontos do espectro.
-
-    psbty1 = tb1.peak_possibilites(db.table, N = 1, ret_unknown = 0)
-    psbty1_count = psbty1.value_counts(normalize = True)
-    
-    
-    end = time.time()
-    total_time = end - start#N = 5: 90s, N = 1: 43s.
+   pass
         
         
         
