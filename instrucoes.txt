@@ -1,0 +1,31 @@
+Próximas implementações ao código:
+
+1. Renomear: tablet -> pellet
+2. Verificar consistência no IO
+3. Classificação da Amostra:
+	3.1. Tabela "Peak Possibilities":
+		3.1.1. adicionar coluna intensidade.
+		3.1.2. comparar com int rel NIST.
+		3.1.3. sanar disputas de picos.
+	3.2. Tabela "Peaks (localized)":
+		3.2.1. Data visualization...
+		3.2.2. seleção de informação por elemento e/ou lambda.
+		3.2.3. Plot da seleção com plotly seguindo exp fis mod
+	3.3. Modelagem simples:
+		3.3.1. Quantidade de picos norm -> presença/ausência
+		3.3.2. Elementos presentes -> categoria
+		3.3.3. Categorias: solo, metal, planta, artifical, etc.
+4. Análise quantitativa:
+	4.1. Fitting de Picos:
+		4.1.1. Filtragem "rápida" por melhores picos.
+		4.1.2. Plot picos possíveis para ajuste manual user
+			4.1.2.1. Forma do pico: voigt, Lort, Gauss, etc
+			4.1.2.2. Parâmetros do pico: mouse (Pygame)
+			4.1.3.3. Fitting dinâmico (runtime)
+		4.2.3. Cálculo de intensidades
+	4.2. Boltzmann Plot
+	4.3. Saha-Boltzmann
+	4.4. Curva de validação (?)
+5. Data Science para zonas de manejo.
+	5.1. A decidir.
+
