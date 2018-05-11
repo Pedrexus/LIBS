@@ -21,7 +21,7 @@ class Tablet:
                 [-1, 2047, 3976, 5935, 7893, 9835, 11771, 13591])
         self.spectrum = self.df_all_files(**kwargs)
         
-    def interpolate(self, N, ):
+    def interpolate(self, N, avg = False):
         """make spline interpolation of N times current number of data points
         and return the numeric result: demands heavy processing,
         try multiprocessing in the future."""
@@ -29,6 +29,7 @@ class Tablet:
         new_wl, step = np.linspace(wl[0], wl[-1], num = N*len(wl),
                                    endpoint = True, retstep = True)
         s = self.spectrum
+        if avg: s = pd.DataFrame(s.mean(axis = 1))
         splines = (CubicSpline(s.index, s[col]) for col in s)
 
         #The spectms do not have a fixed step, this is just an aproximation.
@@ -42,7 +43,7 @@ class Tablet:
     
     
     def peak_possibilites(self, db_table, N = 1, ret_unknown = True, **kwargs):
-        step, new_spectms, new_spectrum = self.interpolate(N)
+        step, new_spectms, new_spectrum = self.interpolate(N, **kwargs)
         unc_delta = N*step
                  
         *_, db_wl  = self.__get_from_db(db_table, keyword = 'wavelength')
@@ -155,11 +156,12 @@ class Tablet:
         return peaks_indexes, spta_peaks
     
     def peaks_in_all_spectrum(self, full_spectrum, **kwargs):
+        df = pd.DataFrame(full_spectrum)
         
         all_peaks = []
-        for col in full_spectrum:
+        for col in df:
             peaks_indexes, spta_peaks = self.peaks_in_spectra(
-                spectra = full_spectrum[col], **kwargs)
+                spectra = df[col], **kwargs)
             all_peaks = np.concatenate([all_peaks, spta_peaks], axis = 0)
         
         sptm_unique_peaks = np.unique(all_peaks)
@@ -171,7 +173,7 @@ class Tablet:
 
         return self.spectrum.loc[spta_peaks].corr()
     
-    def comparisson(self, full_output = False, *Tablets, **kwargs):
+    def comparisson(self, *Tablets, full_output = True, **kwargs):
         peaks_indexes, spta_peaks = self.peaks_in_spectra(self.avg_spectra,
                                                           **kwargs)
         out_sptm = [s.avg_spectra.loc[spta_peaks] for s in [self, *Tablets]]
