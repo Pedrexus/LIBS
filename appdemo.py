@@ -6,19 +6,19 @@ Created on Wed May  2 23:42:56 2018
 @author: pedro
 """
 
-from tablet import Tablet
+from pellet import Pellet
 from nist import NIST
 import time
 start = time.time()
     
 path1 = r'/home/pedro/PythonProjects/LIBS/data/1'
-tb1 = Tablet(path1)
+tb1 = Pellet(path1)
     
 path2 = r'/home/pedro/PythonProjects/LIBS/data/18'
-tb18 = Tablet(path2)
+tb18 = Pellet(path2)
     
 path3 = r'/home/pedro/PythonProjects/LIBS/data/23'
-tb23 = Tablet(path3)
+tb23 = Pellet(path3)
             
 tb1.drop_outliers(reference = tb1.avg_spectra)
 tb18.drop_outliers(reference = tb18.avg_spectra)
@@ -41,7 +41,7 @@ db = NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
     #tem um erro acontecendo, confira fazendo n_picos/n_pontos do espectro.
 
 psbty1 = tb1.peak_possibilites(db.table, N = 1, avg = 1, ret_unknown = 1)
-psbty1_count = psbty1.value_counts(normalize = True)
+#psbty1_count = psbty1.value_counts()
     
 end = time.time()
 total_time = end - start#N = 5: 90s, N = 1: 43s PC - N = 1: 80s.
