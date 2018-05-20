@@ -1,10 +1,10 @@
 Próximas implementações ao código:
 
-1. Renomear: tablet -> pellet
+1. Renomear: tablet -> pellet                                              [ok]
 2. Verificar consistência no IO
 3. Classificação da Amostra:
 	3.1. Tabela "Peak Possibilities":
-		3.1.1. adicionar coluna intensidade.
+		3.1.1. adicionar coluna intensidade.                                [ok]
 		3.1.2. comparar com int rel NIST.
 		3.1.3. sanar disputas de picos.
 	3.2. Tabela "Peaks (localized)":
