@@ -154,7 +154,7 @@ class NIST( Constants ):
         data[col] = values
         
     def __repr__(self):
-        print(self.table)
+        self.table
                             
 """Example:
         A = NIST(elements = ['C I', 'B I'], conf_out = False, upp_w = 1000,
