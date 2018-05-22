@@ -25,3 +25,6 @@ def is_number(string):
 
 def magnitude(number):
     return int( np.floor( np.log10( number )) )
+
+def intersection(A, B):
+    return [x for x in A if x in B]

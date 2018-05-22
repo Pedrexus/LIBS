@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import peakutils as pu
 from scipy.interpolate import CubicSpline
-from extra_functions import magnitude
+from extra_functions import *
 
 class Pellet:
     
@@ -202,12 +202,14 @@ class Pellet:
         return col_pos, col_name, db_col
         
 
-class DB_peaks:
+class Revision:
     
     def __init__(self, series):
         self.data = series
         
     def __getitem__(self, keys):
+        """Revision['C I', 'Ti I'] -> all peaks with both possible elements."""
+        if type(keys) == str:   keys = [keys] #review:  not pythonic.
         if keys == 'UNKNOWN':
             idx = np.where( self.data == keys )
         else:
@@ -216,13 +218,21 @@ class DB_peaks:
                 loc = []
                 for i, tupl in enumerate(self.data):
                     for value in tupl:
-                        if key in value:
+                        if key == remove_non_ascii(value):
                             loc.append(i)
                             
-                idx = list( filter(lambda x: x in loc, idx) )
-                #idx = [x for x in idx if x in loc]
+                idx = intersection(idx, loc)
                         
         return self.data.iloc[idx]
+    
+    def __call__(self, integer):
+        """Revision(2) -> all peaks with 2 possible elements."""
+        idx = []
+        for i, tupl in enumerate(self.data):
+            if len(tupl) == integer:
+                idx.append(i)
+                
+        return self.data.iloc[idx]    
     
     def __repr__(self):
         return repr(self.data)
