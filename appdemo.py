@@ -54,7 +54,7 @@ db = NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
     #tem um erro acontecendo, confira fazendo n_picos/n_pontos do espectro.
 
 psbty1 = tb1.peak_possibilites(db.table, N = 1, avg = 1, ret_unknown = 1)
-study_object = Revision(psbty1['possibilities'])
+study_object = Revision(psbty1['possibilities']) #-> rename Glasses
 
 do_i_have_both = study_object['C I', 'Ti I']
 which_ones_are_unique = study_object(1) #-> esse objeto possui um resultado 
@@ -63,4 +63,4 @@ which_ones_are_unique = study_object(1) #-> esse objeto possui um resultado
 end = time.time()
 total_time = end - start#N = 5: 90s, N = 1: 43s PC - N = 1: 80s.
 
-    #Pesquisar sobre multiprocessing.
+    #Pesquisar sobre multiprocessing.#
