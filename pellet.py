@@ -202,8 +202,31 @@ class Pellet:
         return col_pos, col_name, db_col
         
 
-if __name__ == '__main__':
-   pass
+class DB_peaks:
+    
+    def __init__(self, series):
+        self.data = series
+        
+    def __getitem__(self, keys):
+        if keys == 'UNKNOWN':
+            idx = np.where( self.data == keys )
+        else:
+            idx = range(len(self.data))
+            for key in keys:
+                loc = []
+                for i, tupl in enumerate(self.data):
+                    for value in tupl:
+                        if key in value:
+                            loc.append(i)
+                            
+                idx = list( filter(lambda x: x in loc, idx) )
+                #idx = [x for x in idx if x in loc]
+                        
+        return self.data.iloc[idx]
+    
+    def __repr__(self):
+        return repr(self.data)
+                
         
         
         
