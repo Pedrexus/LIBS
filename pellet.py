@@ -202,15 +202,17 @@ class Pellet:
         return col_pos, col_name, db_col
         
 
-class Revision:
+class Magnifier:
+    """A tool made to be used in deeper analysis of the 
+    Pellet.peak_possibilities()"""
     
     def __init__(self, series):
         self.data = series
         
     def __getitem__(self, keys):
-        """Revision['C I', 'Ti I'] -> all peaks with both possible elements."""
+        """Magnifier['C I', 'Ti I'] -> all peaks with both possible elements."""
         if type(keys) == str:   keys = [keys] #review:  not pythonic.
-        if keys == 'UNKNOWN':
+        if keys == ['UNKNOWN']:
             idx = np.where( self.data == keys )
         else:
             idx = range(len(self.data))
@@ -223,19 +225,24 @@ class Revision:
                             
                 idx = intersection(idx, loc)
                         
-        return self.data.iloc[idx]
+        return self.__class__(self.data.iloc[idx])
     
     def __call__(self, integer):
-        """Revision(2) -> all peaks with 2 possible elements."""
+        """Magnifier(2) -> all peaks with 2 possible elements."""
         idx = []
         for i, tupl in enumerate(self.data):
             if len(tupl) == integer:
                 idx.append(i)
                 
-        return self.data.iloc[idx]    
+        return self.__class__(self.data.iloc[idx]) 
     
     def __repr__(self):
         return repr(self.data)
+    
+    def value_counts(self, **kwargs):
+        """Counts values based on pandas.Series.value_counts() method."""
+        return self.data.value_counts(**kwargs)
+        
                 
         
         

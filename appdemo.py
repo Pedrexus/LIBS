@@ -6,7 +6,7 @@ Created on Wed May  2 23:42:56 2018
 @author: pedro
 """
 
-from pellet import Pellet, Revision
+from pellet import Pellet, Magnifier
 from nist import NIST
 import time
 import sys
@@ -45,7 +45,7 @@ C_all = tb18.comparisson(tb1, tb23)
 db = NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
                       'Al I', 'Al II', 'Fe I', 'Fe II', 'Ti I', 'Ti II',
                       'Na I', 'Ca I', 'Zn I', 'O I', 'Pb I', 'Mg I', 'Mg II',
-                      'Si I'],
+                      'Si I', 'C II', 'O II', 'Ca II', 'Pb II', 'S II'],
           conf_out = False, upp_w = 1000, line_out = 3, g_out = False)   
     
     #É importante notar que um mesmo pico será contado mais de uma vez, pois,
@@ -54,7 +54,7 @@ db = NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
     #tem um erro acontecendo, confira fazendo n_picos/n_pontos do espectro.
 
 psbty1 = tb1.peak_possibilites(db.table, N = 1, avg = 1, ret_unknown = 1)
-study_object = Revision(psbty1['possibilities']) #-> rename Glasses
+study_object = Magnifier(psbty1['possibilities']) #-> rename Glasses
 
 do_i_have_both = study_object['C I', 'Ti I']
 which_ones_are_unique = study_object(1) #-> esse objeto possui um resultado 
