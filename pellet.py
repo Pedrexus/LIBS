@@ -208,6 +208,7 @@ class Magnifier:
     
     def __init__(self, series):
         self.data = series
+        self.index = self.data.index
         
     def __getitem__(self, keys):
         """Magnifier['C I', 'Ti I'] -> all peaks with both possible elements."""
@@ -242,7 +243,6 @@ class Magnifier:
     def value_counts(self, **kwargs):
         """Counts values based on pandas.Series.value_counts() method."""
         return self.data.value_counts(**kwargs)
-        
                 
         
         
