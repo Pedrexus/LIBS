@@ -22,7 +22,34 @@ class Pellet:
         self.spectms = np.array(
                 [-1, 2047, 3976, 5935, 7893, 9835, 11771, 13591])
         self.spectrum = self.df_all_files(**kwargs)
+    
+    def __best_peak_function(self, element_data):
+        """abstract function yet."""
+        return element_data.index[0]
+    
+    def compare(self, db_table, element, pbty_df, peaks_intsty, unc_delta):
+        wl_pos, *_  = self.__get_from_db(db_table, keyword = 'wavelength')
+        _, ion_name, _ = self.__get_from_db(db_table, keyword = 'ion')
+        _, int_name, _ = self.__get_from_db(db_table, keyword = 'int')
+        db_table.set_index(db_table.columns[wl_pos], inplace = True)
         
+        elmt_presence = Magnifier(pbty_df)(1)[element].data
+        best_peak = self.__best_peak_function(elmt_presence)
+        
+        data_best_peak_intsty = peaks_intsty.loc[best_peak]
+        data_rel_int = peaks_intsty/data_best_peak_intsty
+        
+        ion_col = np.array(list(map(remove_non_ascii, db_table[ion_name])))
+        db_elmt = db_table.iloc[np.where(ion_col == element)[0]]
+        
+        db_int_elmt = db_elmt[int_name]
+        db_best_peak_intsty = db_int_elmt.iloc[
+                np.where(np.abs(db_wl - best_peak) < unc_delta)[0] ]        
+        
+        db_rel_int = db_int_elmt/db_best_peak_intsty
+        
+        return data_rel_int, db_rel_int       
+    
     def interpolate(self, N, avg = False):
         """make spline interpolation of N times current number of data points
         and return the numeric result: demands heavy processing,
@@ -42,7 +69,6 @@ class Pellet:
                                     columns = new_wl ).T
         
         return step, new_spectms, new_spectrum
-    
     
     def peak_possibilites(self, db_table, N = 1, ret_unknown = True, **kwargs):
         step, new_spectms, new_spectrum = self.interpolate(N, **kwargs)
@@ -65,14 +91,15 @@ class Pellet:
             if any(np.abs(db_wl - peak) < unc_delta):
                 possibilities = np.where(np.abs(db_wl - peak) < unc_delta)[0]
                 unq = np.unique(db_ion[possibilities])
-                db_pblty[peak] = [tuple(unq), float(new_spectrum.loc[peak])]
+                db_pblty[peak] = tuple(unq)
             else:
                 if ret_unknown: db_pblty[peak] = 'UNKNOWN'
                 else:           pass
         
-        pbty_df = pd.DataFrame(db_pblty, index = ['possibilities', 'height']).T
+        pbty_df = pd.Series(db_pblty)
+        peaks_height = new_spectrum.loc[pbty_df.index]
         
-        return pbty_df
+        return pbty_df, peaks_height, unc_delta
 
     def outliers(self, min_similarity = .99, pct_votes = .5, inliers = False,
                  **kwargs):

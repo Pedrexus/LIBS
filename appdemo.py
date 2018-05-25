@@ -53,12 +53,16 @@ db = NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
     #como um ponto, mas equivale ao mesmo pico efetivamente. Apesar disso, não 
     #tem um erro acontecendo, confira fazendo n_picos/n_pontos do espectro.
 
-psbty1 = tb1.peak_possibilites(db.table, N = 1, avg = 1, ret_unknown = 1)
-study_object = Magnifier(psbty1['possibilities']) #-> rename Glasses
+psbty, height, unc = tb1.peak_possibilites(db.table, N = 1, avg = 1, ret_unknown = 1)
+study_object = Magnifier(psbty) #-> rename Glasses
 
 do_i_have_both = study_object['C I', 'Ti I']
 which_ones_are_unique = study_object(1) #-> esse objeto possui um resultado 
                                         #muito valioso para findar as disputas
+
+data_rel_int, db_rel_int = tb1.compare(db_table = db.table, element = 'Fe I', 
+                                       pbty_df = psbty, peaks_intsty = height,
+                                       unc_delta = unc)
     
 end = time.time()
 total_time = end - start#N = 5: 90s, N = 1: 43s PC - N = 1: 80s.
