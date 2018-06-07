@@ -27,29 +27,99 @@ class Pellet:
         """abstract function yet."""
         return element_data.index[0]
     
-    def compare(self, db_table, element, pbty_df, peaks_intsty, unc_delta):
-        wl_pos, *_  = self.__get_from_db(db_table, keyword = 'wavelength')
-        _, ion_name, _ = self.__get_from_db(db_table, keyword = 'ion')
-        _, int_name, _ = self.__get_from_db(db_table, keyword = 'int')
-        db_table.set_index(db_table.columns[wl_pos], inplace = True)
+    def __data_rel_int(self, element, pbty_df, pks_itsty):
+        elmt_in_data = Magnifier(pbty_df)(1)[element].data
+        best_peak = self.__best_peak_function(elmt_in_data) ###
+        data_best_peak_intsty = pks_itsty.loc[best_peak]
         
-        elmt_presence = Magnifier(pbty_df)(1)[element].data
-        best_peak = self.__best_peak_function(elmt_presence)
+        data_rel_int = pks_itsty.loc[elmt_in_data.index]/data_best_peak_intsty
         
-        data_best_peak_intsty = peaks_intsty.loc[best_peak]
-        data_rel_int = peaks_intsty/data_best_peak_intsty
+        return data_rel_int, best_peak  
+
+    def __element_wavelenght_conection(self, db_wvlgth, data_wvlgth):
         
-        ion_col = np.array(list(map(remove_non_ascii, db_table[ion_name])))
-        db_elmt = db_table.iloc[np.where(ion_col == element)[0]]
+        wl_cnx = {}
+        for wl in db_wvlgth:
+            distances = np.abs(data_wvlgth - wl)
+            condition = distances <= self.unc_delta
+            if any(condition):
+                idx = np.argmin(distances)
+                wl_cnx[wl] = data_wvlgth[idx]
         
-        db_int_elmt = db_elmt[int_name]
-        db_best_peak_intsty = db_int_elmt.iloc[
-                np.where(np.abs(db_wl - best_peak) < unc_delta)[0] ]        
+        return pd.Series(wl_cnx)
         
-        db_rel_int = db_int_elmt/db_best_peak_intsty
+    def __db_rel_int(self, db_table, element, best_peak, data_wvlgth):
         
-        return data_rel_int, db_rel_int       
+        *_, wl_col = self.__get_from_db(db_table, keyword = 'wavelength')
+        db_table.set_index(wl_col, inplace = True)
+        
+        _, ion_name, *_ = self.__get_from_db(db_table, keyword = 'ion')
+        db_elmt_wvlgth = Magnifier(db_table[ion_name])[element].index                      
+        
+        wl_cnx = self.__element_wavelenght_conection(
+                    db_wvlgth = db_elmt_wvlgth,
+                    data_wvlgth = data_wvlgth)
+        
+        _, int_name, *_ = self.__get_from_db(db_table, keyword = 'int')
+        db_int_elmt_in = db_table[int_name].loc[wl_cnx.index] 
+        db_best_peak_intsty = db_int_elmt_in.iloc[
+                np.where(wl_cnx == best_peak)[0][0] ]        
+        
+        db_rel_int = db_int_elmt_in/db_best_peak_intsty
+        
+        return db_rel_int, wl_cnx
+        
+    def compare(self, db_table, element, pbty_df, pks_itsty):
+        unc_delta = self.unc_delta
+        
+        data_rel_int, best_peak = self.__data_rel_int(
+                element, pbty_df, pks_itsty)
+        
+        db_rel_int, wl_cnx = self.__db_rel_int(db_table, element, best_peak,
+                                        data_wvlgth = data_rel_int.index)
+        
+        new_db_rel_int = self._merge(db_rel_int, unc_delta, kind = 'sum')
+        new_data_rel_int = self._merge(data_rel_int.mean(axis = 1), unc_delta,
+                                       kind = 'max')
+        
+        return new_data_rel_int, new_db_rel_int  
     
+    @staticmethod
+    def _merge(series, unc_delta, kind):
+        s_name = series.name
+        series = series.reset_index(name = 'values')
+        new_series = dict()
+        iterator = iter(series.index)
+        
+        i_0 = next(iterator)
+        wl_0 = series['index'][i_0]
+        while not iterator_is_empty(iterator):
+            i_1 = next(iterator)
+            wl_1 = series['index'][i_1]
+            
+            counter = 1
+            wl = series['index'][i_0]
+            intsty = series['values'][i_0]
+            
+            while np.abs(wl_1 - wl_0) <= unc_delta:
+                counter += 1
+                wl += wl_1
+                if kind == 'sum':
+                    intsty += series['values'][i_1]
+                if kind == 'max':
+                    intsty = max(intsty, series['values'][i_1])
+                
+                if not iterator_is_empty(iterator):   
+                    i_1 = next(iterator)
+                    wl_1 = series['index'][i_1]
+                else:   break 
+            i_0 = i_1
+            wl_0 = wl_1
+            
+            new_series[wl/counter] = intsty
+            
+        return pd.Series(new_series, name = s_name)
+
     def interpolate(self, N, avg = False):
         """make spline interpolation of N times current number of data points
         and return the numeric result: demands heavy processing,
@@ -72,7 +142,7 @@ class Pellet:
     
     def peak_possibilites(self, db_table, N = 1, ret_unknown = True, **kwargs):
         step, new_spectms, new_spectrum = self.interpolate(N, **kwargs)
-        unc_delta = N*step
+        self.unc_delta = unc_delta = N*step
         flt_point = - magnitude(unc_delta)
                  
         *_, db_wl  = self.__get_from_db(db_table, keyword = 'wavelength')
@@ -87,11 +157,13 @@ class Pellet:
         new_spectrum.index = np.array(new_spectrum.index).round(flt_point)
 
         db_pblty = {}
+        db_wl_in = []
         for peak in sptm_unique_peaks:
             if any(np.abs(db_wl - peak) < unc_delta):
                 possibilities = np.where(np.abs(db_wl - peak) < unc_delta)[0]
                 unq = np.unique(db_ion[possibilities])
                 db_pblty[peak] = tuple(unq)
+                db_wl_in.append(np.unique(db_wl[possibilities]))
             else:
                 if ret_unknown: db_pblty[peak] = 'UNKNOWN'
                 else:           pass
@@ -99,7 +171,7 @@ class Pellet:
         pbty_df = pd.Series(db_pblty)
         peaks_height = new_spectrum.loc[pbty_df.index]
         
-        return pbty_df, peaks_height, unc_delta
+        return pbty_df, peaks_height, db_wl_in
 
     def outliers(self, min_similarity = .99, pct_votes = .5, inliers = False,
                  **kwargs):
@@ -221,7 +293,7 @@ class Pellet:
     @staticmethod
     def __get_from_db(db_table, keyword):
         col_pos = np.where(
-             [(keyword.lower() in col.lower()) for col in db_table.columns])[0]
+          [(keyword.lower() in col.lower()) for col in db_table.columns])[0][0]
         col_name = db_table.columns[col_pos]
         
         db_col = db_table.iloc[:, col_pos].values
@@ -247,9 +319,14 @@ class Magnifier:
             for key in keys:
                 loc = []
                 for i, tupl in enumerate(self.data):
-                    for value in tupl:
-                        if key == remove_non_ascii(value):
-                            loc.append(i)
+                    if type(tupl) == tuple:
+                        for value in tupl:
+                            if key == remove_non_ascii(value):
+                                loc.append(i)
+                    elif type(tupl) == str:
+                            if key == remove_non_ascii(tupl):
+                                loc.append(i)
+                    else:   pass
                             
                 idx = intersection(idx, loc)
                         

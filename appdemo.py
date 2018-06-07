@@ -60,9 +60,8 @@ do_i_have_both = study_object['C I', 'Ti I']
 which_ones_are_unique = study_object(1) #-> esse objeto possui um resultado 
                                         #muito valioso para findar as disputas
 
-data_rel_int, db_rel_int = tb1.compare(db_table = db.table, element = 'Fe I', 
-                                       pbty_df = psbty, peaks_intsty = height,
-                                       unc_delta = unc)
+new_data_rel_int, new_db_rel_int = tb1.compare(db_table = db.table, element = 'Fe I', 
+                                       pbty_df = psbty, pks_itsty = height)
     
 end = time.time()
 total_time = end - start#N = 5: 90s, N = 1: 43s PC - N = 1: 80s.

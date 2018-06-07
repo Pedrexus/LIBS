@@ -8,6 +8,8 @@ Useful extra functions
 """
 
 import numpy as np
+import itertools
+import copy
 
 def remove_non_ascii(string):
     new_string = []
@@ -28,3 +30,14 @@ def magnitude(number):
 
 def intersection(A, B):
     return [x for x in A if x in B]
+
+def iterator_is_empty(iterator):
+    iterator_copy = copy.copy(iterator)
+    try:
+        first = next(iterator_copy)
+    except StopIteration:
+        return True
+    else:
+        #iterator_copy = itertools.chain([first], iterator)
+        return False 
+    
