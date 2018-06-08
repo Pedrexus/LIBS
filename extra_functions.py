@@ -8,6 +8,7 @@ Useful extra functions
 """
 
 import numpy as np
+import math
 import itertools
 import copy
 
@@ -34,10 +35,33 @@ def intersection(A, B):
 def iterator_is_empty(iterator):
     iterator_copy = copy.copy(iterator)
     try:
-        first = next(iterator_copy)
+        next(iterator_copy)
     except StopIteration:
         return True
     else:
         #iterator_copy = itertools.chain([first], iterator)
         return False 
+    
+def is_sorted(x, key = lambda x: x):
+    return all([key(x[i]) <= key(x[i + 1]) for i in range(len(x) - 1)])
+    
+def find_nearest(array, value):
+    array = np.asarray(array)
+    
+    if is_sorted(array):
+        idx = np.searchsorted(array, value, side="left")
+        if idx > 0 and (idx == len(array) or 
+            math.fabs(value - array[idx - 1]) < math.fabs(value - array[idx])):
+                return array[idx - 1]
+        else:
+                return array[idx]
+    else:    
+        idx = (np.abs(array - value)).argmin()
+        return array[idx]
+    
+def slice_by_nearest(data, interval):
+    a = find_nearest(data.index, interval[0])
+    b = find_nearest(data.index, interval[1])
+    return data[a:b]
+
     

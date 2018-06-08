@@ -8,6 +8,7 @@ Created on Wed May  2 23:42:56 2018
 
 from pellet import Pellet, Magnifier
 from nist import NIST
+from research import Research
 import time
 import sys
 
@@ -16,9 +17,9 @@ start = time.time()
 ubuntu = [r'/home/pedro/PythonProjects/LIBS/data/1',
           r'/home/pedro/PythonProjects/LIBS/data/18',
           r'/home/pedro/PythonProjects/LIBS/data/23']
-windows = [r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\1', 
-           r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\18',
-           r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\23']    
+windows = [r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\29', 
+           r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\31',
+           r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\33']    
 
 paths = []
 if 'linux' in sys.platform:
@@ -28,16 +29,20 @@ else:
     for path in windows:
         paths.append(path)
 
-tb1 = Pellet(paths[0]) 
-tb18 = Pellet(paths[1])
-tb23 = Pellet(paths[2])
+tb1 = Pellet(paths[0], name = '29') 
+tb18 = Pellet(paths[1], name = '31')
+tb23 = Pellet(paths[2], name = '33')
             
 tb1.drop_outliers(reference = tb1.avg_spectra)
 tb18.drop_outliers(reference = tb18.avg_spectra)
 tb23.drop_outliers(reference = tb23.avg_spectra)
 
+Experiment = Research(tb1, tb18, tb23, directory = 'Research')
+Experiment.plot_avg_spectrum()
+
 #tb3.outliers()
-    
+
+"""    
 C1 = tb18.comparisson(tb1)
 C2 = tb18.comparisson(tb23)
 C_all = tb18.comparisson(tb1, tb23)
@@ -67,3 +72,7 @@ end = time.time()
 total_time = end - start#N = 5: 90s, N = 1: 43s PC - N = 1: 80s.
 
     #Pesquisar sobre multiprocessing.#
+    #criar pasta para salvar gráficos, pq eles estão se perdendo nas pastas.
+    #em experiment, o usuario eve ser capaz de escolhr quais subgrupos de pellets ele quer analisar.]
+    #reescrever compare com slice_by_nearest
+"""

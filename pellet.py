@@ -16,8 +16,9 @@ from extra_functions import *
 
 class Pellet:
     
-    def __init__(self, data, **kwargs):
+    def __init__(self, data, name = '', **kwargs):
         self.data = data
+        self.name = name
         self.root = os.getcwd()
         self.spectms = np.array(
                 [-1, 2047, 3976, 5935, 7893, 9835, 11771, 13591])
@@ -197,13 +198,16 @@ class Pellet:
         return self.spectrum.drop(self.outliers(**kwargs), axis = 1,
                                   inplace = True)
     
+    
     def repositioner(func):
         """To be used as a decorator on functions requiring file management."""
         def wrapper(self, *args, **kwargs):
             os.chdir(self.data)
-            return func(self, *args, **kwargs)
-            os.chdir(self.root) 
+            output = func(self, *args, **kwargs)
+            os.chdir(self.root)
+            return output
         return wrapper
+    
     
     @repositioner    
     def df_all_files(self, file_format = '.ols', drop_empty = True):
