@@ -10,35 +10,34 @@ from pellet import Pellet, Magnifier
 from nist import NIST
 from research import Research
 import time
-import sys
+import sys, glob, os
 
 start = time.time()
 
-ubuntu = [r'/home/pedro/PythonProjects/LIBS/data/1',
-          r'/home/pedro/PythonProjects/LIBS/data/18',
-          r'/home/pedro/PythonProjects/LIBS/data/23']
-windows = [r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\29', 
-           r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\31',
-           r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\33']    
+ubuntu = r'/home/pedro/PythonProjects/LIBS/data'
+windows = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data'   
 
 paths = []
 if 'linux' in sys.platform:
-    for path in ubuntu:
+    dirs = glob.glob1(ubuntu, '*')
+    for d in dirs:
+        path = os.path.join(ubuntu, d)
         paths.append(path)
 else:
-    for path in windows:
+    dirs = glob.glob1(windows, '*')
+    for d in dirs:
+        path = os.path.join(windows, d)
         paths.append(path)
 
-tb1 = Pellet(paths[0], name = '29') 
-tb18 = Pellet(paths[1], name = '31')
-tb23 = Pellet(paths[2], name = '33')
-            
-tb1.drop_outliers(reference = tb1.avg_spectra)
-tb18.drop_outliers(reference = tb18.avg_spectra)
-tb23.drop_outliers(reference = tb23.avg_spectra)
+pellets = []        
+for path, d in zip(paths, dirs):
+    pellets.append(Pellet(path, name = d))
 
-Experiment = Research(tb1, tb18, tb23, directory = 'Research')
-Experiment.plot_avg_spectrum()
+for plt in pellets:
+    plt.drop_outliers(reference = plt.avg_spectra)
+
+Experiment = Research(*pellets, dirname = 'Research')
+Experiment.plot_avg_spectrum(names = ['1', '3', '5'], region = [190, 195])
 
 #tb3.outliers()
 

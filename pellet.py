@@ -303,6 +303,9 @@ class Pellet:
         db_col = db_table.iloc[:, col_pos].values
         
         return col_pos, col_name, db_col
+    
+    def __repr__(self):
+        return 'Pellet(' + str(self.name) + ')'
         
 
 class Magnifier:
