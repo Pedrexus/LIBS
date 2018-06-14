@@ -7,6 +7,7 @@ Created on Thu Jun  7 10:13:02 2018
 import plotly.offline as py
 import plotly.graph_objs as go
 from extra_functions import slice_by_nearest
+from pellet import Magnifier
 import os
 import logging
 
@@ -36,7 +37,8 @@ class Research:
     def plot_avg_spectrum(self, region = '', names = None):
         if not names:   names = self.__names
         
-        fig = []
+        traces = []
+        notes = []
         for plt in self.pellets:
             if plt.name not in names:   continue
             data = plt.avg_spectra
@@ -48,10 +50,28 @@ class Research:
                     y = data,
                     mode = 'lines',
                     name = plt.name)
-            fig.append(trace)
+            traces.append(trace)
             
+            for row in plt.peaks_table[0].index:
+                #include region, Magnifier, etc.
+                notes.append(
+                        dict(
+                                x = row,
+                                y = float(plt.peaks_table[1].loc[row]),
+                                xref = 'x',
+                                yref = 'y',
+                                text = str(plt.peaks_table[0][row]),
+                                showarrow = True,
+                                arrowhead = 7,
+                                ax = 0,
+                                ay = -40   
+                            )
+                        )
+            layout = go.Layout(showlegend = False,
+                               annotations = notes)
+            
+        fig = go.Figure(data = traces, layout = layout)
         filename = 'plot_avg(' + '_'.join(list(names) + [str(region)]) + ')'
-        
         py.plot(fig, filename = ''.join([filename, '.html']), validate = False)
         
     def makedirs(self, directory):

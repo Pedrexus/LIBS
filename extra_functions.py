@@ -11,6 +11,8 @@ import numpy as np
 import math
 import itertools
 import copy
+from functools import wraps
+import logging, time
 
 def remove_non_ascii(string):
     new_string = []
@@ -64,4 +66,16 @@ def slice_by_nearest(data, interval):
     b = find_nearest(data.index, interval[1])
     return data[a:b]
 
+def timing(func):
+    """This decorator prints the execution time for the decorated function."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        logging.debug("{} ran in {}s".format(
+                func.__name__, round(end - start, 2)
+                ))
+        return result
+    return wrapper
     

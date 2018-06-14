@@ -28,6 +28,13 @@ class Pellet:
         """abstract function yet."""
         return element_data.index[0]
     
+    def peaks_table(self, db_table, *args, **kwargs):
+        """abstract function yet."""
+        psbty_df, peaks_height, _ = self.peak_possibilites(db_table, N = 1, 
+                                              ret_unknown = True, avg = True,
+                                              **kwargs)
+        self.peaks_table = [psbty_df, peaks_height]
+    
     def __data_rel_int(self, element, pbty_df, pks_itsty):
         elmt_in_data = Magnifier(pbty_df)(1)[element].data
         best_peak = self.__best_peak_function(elmt_in_data) ###
@@ -129,16 +136,16 @@ class Pellet:
         new_wl, step = np.linspace(wl[0], wl[-1], num = N*len(wl),
                                    endpoint = True, retstep = True)
         s = self.spectrum
-        if avg: s = pd.DataFrame(s.mean(axis = 1))
+        if avg: s = pd.DataFrame(self.avg_spectra)
         splines = (CubicSpline(s.index, s[col]) for col in s)
-
+    
         #The spectms do not have a fixed step, this is just an aproximation.
         update = [int( (wl[i] - new_wl[0])/step ) for i in self.spectms[1:]]
         new_spectms = np.array([-1] + update)
-        
+            
         new_spectrum = pd.DataFrame( (f(new_wl) for f in splines),
-                                    columns = new_wl ).T
-        
+                                      columns = new_wl ).T
+
         return step, new_spectms, new_spectrum
     
     def peak_possibilites(self, db_table, N = 1, ret_unknown = True, **kwargs):
