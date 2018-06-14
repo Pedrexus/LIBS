@@ -59,7 +59,7 @@ def find_nearest(array, value):
                 return array[idx]
     else:    
         idx = (np.abs(array - value)).argmin()
-        return array[idx]
+        return array[idx - 1]
     
 def slice_by_nearest(data, interval):
     a = find_nearest(data.index, interval[0])

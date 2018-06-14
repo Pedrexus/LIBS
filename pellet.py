@@ -325,35 +325,40 @@ class Magnifier:
         
     def __getitem__(self, keys):
         """Magnifier['C I', 'Ti I'] -> all peaks with both possible elements."""
-        if type(keys) == str:   keys = [keys] #review:  not pythonic.
-        if keys == ['UNKNOWN']:
-            idx = np.where( self.data == keys )
-        else:
-            idx = range(len(self.data))
-            for key in keys:
-                loc = []
-                for i, tupl in enumerate(self.data):
-                    if type(tupl) == tuple:
-                        for value in tupl:
-                            if key == remove_non_ascii(value):
-                                loc.append(i)
-                    elif type(tupl) == str:
-                            if key == remove_non_ascii(tupl):
-                                loc.append(i)
-                    else:   pass
+        if keys == None: return self.__class__(self.data)
+        else:            
+            if type(keys) == str:   keys = [keys] #review:  not pythonic.
+            if keys == ['UNKNOWN']:
+                idx = np.where( self.data == keys )
+            else:
+                idx = range(len(self.data))
+                for key in keys:
+                    loc = []
+                    for i, tupl in enumerate(self.data):
+                        if type(tupl) == tuple:
+                            for value in tupl:
+                                if key == remove_non_ascii(value):
+                                    loc.append(i)
+                        elif type(tupl) == str:
+                                if key == remove_non_ascii(tupl):
+                                    loc.append(i)
+                        else:   pass
+                                
+                    idx = intersection(idx, loc)
                             
-                idx = intersection(idx, loc)
-                        
-        return self.__class__(self.data.iloc[idx])
+            return self.__class__(self.data.iloc[idx])
     
     def __call__(self, integer):
         """Magnifier(2) -> all peaks with 2 possible elements."""
-        idx = []
-        for i, tupl in enumerate(self.data):
-            if len(tupl) == integer:
-                idx.append(i)
-                
-        return self.__class__(self.data.iloc[idx]) 
+        if integer == None: return self.__class__(self.data)
+        else:
+            idx = []
+            for i, tupl in enumerate(self.data):
+                if len(tupl) == integer:
+                    idx.append(i)
+                    
+            return self.__class__(self.data.iloc[idx]) 
+            
     
     def __repr__(self):
         return repr(self.data)

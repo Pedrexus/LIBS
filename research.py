@@ -34,7 +34,7 @@ class Research:
         return wrapper
     
     @repositioner
-    def plot_avg_spectrum(self, region = '', names = None):
+    def plot_avg_spectrum(self, region = '', names = None, amount = None, elements = None):
         if not names:   names = self.__names
         
         traces = []
@@ -44,6 +44,10 @@ class Research:
             data = plt.avg_spectra
             if bool(region):    
                 data = slice_by_nearest(data, region)
+                peaks_table = Magnifier(
+                        slice_by_nearest(
+                                plt.peaks_table[0], region)
+                        )(amount)[elements]
             
             trace = go.Scatter(
                     x = data.index,
@@ -52,8 +56,7 @@ class Research:
                     name = plt.name)
             traces.append(trace)
             
-            for row in plt.peaks_table[0].index:
-                #include region, Magnifier, etc.
+            for row in peaks_table.index:
                 notes.append(
                         dict(
                                 x = row,
