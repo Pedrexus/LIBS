@@ -51,7 +51,7 @@ for plt in pellets:
     plt.peaks_table(db.table)
 
 Experiment = Research(*pellets, dirname = 'FResearch')
-Experiment.plot_avg_spectrum(names = ['1', '2'], region = [190, 195])
+Experiment.plot_avg_spectrum(names = ['1', '3', '5'], elements = ['C I'])
 
 #tb3.outliers()  
     

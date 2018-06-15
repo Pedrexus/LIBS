@@ -6,7 +6,7 @@ Created on Thu Jun  7 10:13:02 2018
 """
 import plotly.offline as py
 import plotly.graph_objs as go
-from extra_functions import slice_by_nearest
+from extra_functions import slice_by_inside_interval, iterable_non_ascii
 from pellet import Magnifier
 import os
 import logging
@@ -34,7 +34,8 @@ class Research:
         return wrapper
     
     @repositioner
-    def plot_avg_spectrum(self, region = '', names = None, amount = None, elements = None):
+    def plot_avg_spectrum(self, region = '', names = None,
+                          amount = None, elements = None):
         if not names:   names = self.__names
         
         traces = []
@@ -42,12 +43,12 @@ class Research:
         for plt in self.pellets:
             if plt.name not in names:   continue
             data = plt.avg_spectra
+            peaks_table = plt.peaks_table[0]
             if bool(region):    
-                data = slice_by_nearest(data, region)
-                peaks_table = Magnifier(
-                        slice_by_nearest(
-                                plt.peaks_table[0], region)
-                        )(amount)[elements]
+                data = slice_by_inside_interval(data, region)
+                peaks_table = slice_by_inside_interval(
+                        peaks_table, region)
+            peaks_table = Magnifier(peaks_table)(amount)[elements]
             
             trace = go.Scatter(
                     x = data.index,
@@ -57,13 +58,14 @@ class Research:
             traces.append(trace)
             
             for row in peaks_table.index:
+                textdata = iterable_non_ascii(plt.peaks_table[0][row])
                 notes.append(
                         dict(
                                 x = row,
                                 y = float(plt.peaks_table[1].loc[row]),
                                 xref = 'x',
                                 yref = 'y',
-                                text = str(plt.peaks_table[0][row]),
+                                text = textdata,
                                 showarrow = True,
                                 arrowhead = 7,
                                 ax = 0,

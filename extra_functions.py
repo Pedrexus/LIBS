@@ -18,10 +18,13 @@ def remove_non_ascii(string):
     new_string = []
     for i in string:
         if ord(i) < 128:
-             new_string.append(i)
+            new_string.append(i)
         else: pass
-    
+        
     return ''.join(new_string)
+
+def iterable_non_ascii(iterable):
+    return ', '.join(remove_non_ascii(i) for i in iterable)
 
 def is_number(string):
     try:               float(string)
@@ -47,23 +50,30 @@ def iterator_is_empty(iterator):
 def is_sorted(x, key = lambda x: x):
     return all([key(x[i]) <= key(x[i + 1]) for i in range(len(x) - 1)])
     
-def find_nearest(array, value):
+def find_nearest(array, value, floor = False):
     array = np.asarray(array)
     
     if is_sorted(array):
         idx = np.searchsorted(array, value, side="left")
         if idx > 0 and (idx == len(array) or 
             math.fabs(value - array[idx - 1]) < math.fabs(value - array[idx])):
-                return array[idx - 1]
+                idx -= 1
         else:
-                return array[idx]
+                pass
+        #if floor:
+            #while array[idx] > value:
+                #if idx < 0: idx += 1
+                #elif idx > 0: idx -= 1
+        
+        return array[idx]
+        
     else:    
         idx = (np.abs(array - value)).argmin()
-        return array[idx - 1]
+        return array[idx]
     
-def slice_by_nearest(data, interval):
-    a = find_nearest(data.index, interval[0])
-    b = find_nearest(data.index, interval[1])
+def slice_by_inside_interval(data, interval):
+    a = find_nearest(data.index, interval[0], floor = True)
+    b = find_nearest(data.index, interval[1], floor = True)
     return data[a:b]
 
 def timing(func):
