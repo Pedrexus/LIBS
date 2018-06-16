@@ -48,10 +48,10 @@ def func(plt):
     
 for plt in pellets:
     plt.drop_outliers(reference = plt.avg_spectra)
-    plt.peaks_table(db.table)
+    plt.peaks_table(db.table, N = 1)
 
 Experiment = Research(*pellets, dirname = 'FResearch')
-Experiment.plot_avg_spectrum(names = ['1', '3', '5'], elements = ['C I'])
+Experiment.plot_avg_spectrum(names = ['1', '3', '5'], elements = 'H I')
 
 #tb3.outliers()  
     
@@ -72,10 +72,6 @@ new_data_rel_int, new_db_rel_int = tb1.compare(db_table = db.table, element = 'F
                                        pbty_df = psbty, pks_itsty = height)
 """
 
-
-    
-end = time.time()
-total_time = end - start#N = 5: 90s, N = 1: 43s PC - N = 1: 80s.
 
     #Pesquisar sobre multiprocessing.#
     #reescrever compare com slice_by_nearest

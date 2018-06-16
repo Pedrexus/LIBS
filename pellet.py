@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import peakutils as pu
 from scipy.interpolate import CubicSpline
-from extra_functions import *
+import extra_functions as xf
 
 class Pellet:
     
@@ -20,9 +20,10 @@ class Pellet:
         self.data = data
         self.name = name
         self.root = os.getcwd()
-        self.spectms = np.array(
+        self.spectms = self.origsptms = np.array(
                 [-1, 2047, 3976, 5935, 7893, 9835, 11771, 13591])
-        self.spectrum = self.df_all_files(**kwargs)
+        self.spectrum = self.origsptum = self.df_all_files(**kwargs)
+        self.N = 1
     
     def __best_peak_function(self, element_data):
         """abstract function yet."""
@@ -30,7 +31,7 @@ class Pellet:
     
     def peaks_table(self, db_table, *args, **kwargs):
         """abstract function yet."""
-        psbty_df, peaks_height, _ = self.peak_possibilites(db_table, N = 1, 
+        psbty_df, peaks_height, _ = self.peak_possibilites(db_table, 
                                               ret_unknown = True, avg = True,
                                               **kwargs)
         self.peaks_table = [psbty_df, peaks_height]
@@ -101,7 +102,7 @@ class Pellet:
         
         i_0 = next(iterator)
         wl_0 = series['index'][i_0]
-        while not iterator_is_empty(iterator):
+        while not xf.iterator_is_empty(iterator):
             i_1 = next(iterator)
             wl_1 = series['index'][i_1]
             
@@ -117,7 +118,7 @@ class Pellet:
                 if kind == 'max':
                     intsty = max(intsty, series['values'][i_1])
                 
-                if not iterator_is_empty(iterator):   
+                if not xf.iterator_is_empty(iterator):   
                     i_1 = next(iterator)
                     wl_1 = series['index'][i_1]
                 else:   break 
@@ -145,13 +146,19 @@ class Pellet:
             
         new_spectrum = pd.DataFrame( (f(new_wl) for f in splines),
                                       columns = new_wl ).T
-
-        return step, new_spectms, new_spectrum
+        
+        self.N, self.spectms, self.spectrum = N, new_spectms, new_spectrum
+        
+        return step
     
     def peak_possibilites(self, db_table, N = 1, ret_unknown = True, **kwargs):
-        step, new_spectms, new_spectrum = self.interpolate(N, **kwargs)
+        if self.N == 1:
+            step = self.interpolate(N, **kwargs)
+        if self.N != 1 and self.N != N:
+            raise RuntimeWarning
+        
         self.unc_delta = unc_delta = N*step
-        flt_point = - magnitude(unc_delta)
+        flt_point = - xf.magnitude(unc_delta)
                  
         *_, db_wl  = self.__get_from_db(db_table, keyword = 'wavelength')
         *_, db_ion = self.__get_from_db(db_table, keyword = 'ion')
@@ -159,10 +166,10 @@ class Pellet:
         db_wl = db_wl.round(flt_point)
         
         sptm_unique_peaks = self.peaks_in_all_spectrum(
-                 full_spectrum = new_spectrum, spectms = new_spectms, size = 2,
-                 **kwargs).round(flt_point)
+               full_spectrum = self.spectrum, spectms = self.spectms, size = 2,
+               **kwargs).round(flt_point)
         
-        new_spectrum.index = np.array(new_spectrum.index).round(flt_point)
+        self.spectrum.index = np.array(self.spectrum.index).round(flt_point)
 
         db_pblty = {}
         db_wl_in = []
@@ -177,7 +184,7 @@ class Pellet:
                 else:           pass
         
         pbty_df = pd.Series(db_pblty)
-        peaks_height = new_spectrum.loc[pbty_df.index]
+        peaks_height = self.spectrum.loc[pbty_df.index]
         
         return pbty_df, peaks_height, db_wl_in
 
@@ -240,8 +247,8 @@ class Pellet:
         return self.spectrum.mean(axis = 1)
     
     def peakutils(self, array, **kwargs):
-        base = pu.baseline(array, deg = 2, max_it = 100, tol = 0.001)
-        indexes = pu.indexes(array - base, thres = 0.13, min_dist = 10)
+        base = pu.baseline(array, deg = 2, max_it = 500, tol = 0.0001)
+        indexes = pu.indexes(array - base, thres = 0.13, min_dist = 10*self.N)
         
         return indexes
     
@@ -260,7 +267,7 @@ class Pellet:
             sptm_intensity = spta_intensity[start:end]
             indexes = self.peakutils(sptm_intensity, **kwargs)
             
-            Lattices = np.array([range(i - size//2, i + size//2) for i 
+            Lattices = np.array([range(i - size//2 + 1, i + size//2) for i 
                                  in indexes if i > size/2]).flatten()
             
             peaks_indexes = np.concatenate(
@@ -337,14 +344,14 @@ class Magnifier:
                     for i, tupl in enumerate(self.data):
                         if type(tupl) == tuple:
                             for value in tupl:
-                                if key == remove_non_ascii(value):
+                                if key == xf.remove_non_ascii(value):
                                     loc.append(i)
                         elif type(tupl) == str:
-                                if key == remove_non_ascii(tupl):
+                                if key == xf.remove_non_ascii(tupl):
                                     loc.append(i)
                         else:   pass
                                 
-                    idx = intersection(idx, loc)
+                    idx = xf.intersection(idx, loc)
                             
             return self.__class__(self.data.iloc[idx])
     
