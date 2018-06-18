@@ -14,7 +14,7 @@ import sys, glob, os
 from extra_functions import timing
 
 import logging
-logging.Logger.root.setLevel(30)
+logging.Logger.root.setLevel('DEBUG')
 
 ubuntu = r'/home/pedro/PythonProjects/LIBS/data'
 windows = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data'   
@@ -43,15 +43,15 @@ for path, d in zip(paths, dirs):
     pellets.append(Pellet(path, name = d))
 
 @timing
-def func(plt):
-    plt.peaks_table(db.table)
+def func(plt, N):
+    plt.peaks_table(db.table, N = N)
     
 for plt in pellets:
     plt.drop_outliers(reference = plt.avg_spectra)
-    plt.peaks_table(db.table, N = 1)
+    func(plt, N = 5)
 
 Experiment = Research(*pellets, dirname = 'FResearch')
-Experiment.plot_avg_spectrum(names = ['1', '3', '5'], elements = 'H I')
+Experiment.plot_avg_spectrum(names = '9', amount = 1)
 
 #tb3.outliers()  
     
@@ -75,3 +75,6 @@ new_data_rel_int, new_db_rel_int = tb1.compare(db_table = db.table, element = 'F
 
     #Pesquisar sobre multiprocessing.#
     #reescrever compare com slice_by_nearest
+    #o efeito dopller no pico de HI está superando unc_delta.
+    #N muito elevado está resultando em pontos diferentes com mesmo lambda após
+ #round. É peciso rever isso. 

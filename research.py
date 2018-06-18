@@ -10,6 +10,7 @@ from extra_functions import slice_by_inside_interval, iterable_non_ascii
 from pellet import Magnifier
 import os
 import logging
+import numpy as np
 
 class Research:
     
@@ -57,27 +58,48 @@ class Research:
                     name = plt.name)
             traces.append(trace)
             
-            for row in peaks_table.index:
+            for row, hght in plt.peaks_table[1].loc[peaks_table.index]\
+                                            .iterrows():
                 textdata = iterable_non_ascii(plt.peaks_table[0][row])
                 notes.append(
-                        dict(
-                                x = row,
-                                y = float(plt.peaks_table[1].loc[row]),
-                                xref = 'x',
-                                yref = 'y',
-                                text = textdata,
-                                showarrow = True,
-                                arrowhead = 7,
-                                ax = 0,
-                                ay = -40   
-                            )
+                        self.annotations(row, float(hght), textdata)
                         )
             layout = go.Layout(showlegend = False,
                                annotations = notes)
             
         fig = go.Figure(data = traces, layout = layout)
         filename = 'plot_avg(' + '_'.join(list(names) + [str(region)]) + ')'
-        py.plot(fig, filename = ''.join([filename, '.html']), validate = False)
+        py.plot(fig, filename = ''.join([filename, '.html']), validate = False,
+                auto_open = True)
+        
+    @staticmethod    
+    def annotations(x, y, text):
+        notes = dict(
+                        x = x,
+                        y = y,
+                        xref = 'x',
+                        yref = 'y',
+                        text = text,
+                        showarrow = True,
+                        font = dict(
+                                    family = 'Arial',
+                                    size = 12,
+                                    color = '#000000'
+                                ),
+                        align = 'center',
+                        arrowhead = 7,
+                        arrowsize = 1,
+                        arrowwidth = 2,
+                        arrowcolor = '#636363',
+                        ax = 0,
+                        ay = -40,
+                        bordercolor = '#c7c7c7',
+                        borderwidth = 4,
+                        borderpad = 4,
+                        bgcolor = '#ffffff',
+                        opacity = 0.8
+                )
+        return notes
         
     def makedirs(self, directory):
         self.root = os.getcwd()

@@ -180,7 +180,7 @@ class Pellet:
                 db_pblty[peak] = tuple(unq)
                 db_wl_in.append(np.unique(db_wl[possibilities]))
             else:
-                if ret_unknown: db_pblty[peak] = 'UNKNOWN'
+                if ret_unknown: db_pblty[peak] = ('UNKNOWN',)
                 else:           pass
         
         pbty_df = pd.Series(db_pblty)
@@ -335,7 +335,7 @@ class Magnifier:
         if keys == None: return self.__class__(self.data)
         else:            
             if type(keys) == str:   keys = [keys] #review:  not pythonic.
-            if keys == ['UNKNOWN']:
+            if keys == [('UNKNOWN',)]:
                 idx = np.where( self.data == keys )
             else:
                 idx = range(len(self.data))
