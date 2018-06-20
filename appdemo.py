@@ -19,6 +19,17 @@ logging.Logger.root.setLevel('DEBUG')
 ubuntu = r'/home/pedro/PythonProjects/LIBS/data'
 windows = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data'   
 
+start = time.time()
+print('starting NIST')
+db = NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
+                      'Al I', 'Al II', 'Fe I', 'Fe II', 'Ti I', 'Ti II',
+                      'Na I', 'Ca I', 'Zn I', 'O I', 'Pb I', 'Mg I', 'Mg II',
+                      'Si I', 'C II', 'O II', 'Ca II', 'Pb II', 'S II'],
+          conf_out = False, upp_w = 1000, line_out = 3, g_out = False)
+print(time.time() - start)
+    #Esse é o ponto mais demorado do código. Fazer profiling.
+    
+
 paths = []
 if 'linux' in sys.platform:
     dirs = glob.glob1(ubuntu, '*')
@@ -31,13 +42,6 @@ else:
         path = os.path.join(windows, d)
         paths.append(path)
 
-db = NIST(elements = ['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
-                      'Al I', 'Al II', 'Fe I', 'Fe II', 'Ti I', 'Ti II',
-                      'Na I', 'Ca I', 'Zn I', 'O I', 'Pb I', 'Mg I', 'Mg II',
-                      'Si I', 'C II', 'O II', 'Ca II', 'Pb II', 'S II'],
-          conf_out = False, upp_w = 1000, line_out = 3, g_out = False)
-    #Esse é o ponto mais demorado do código. Fazer profiling.
-
 pellets = []        
 for path, d in zip(paths, dirs):
     pellets.append(Pellet(path, name = d))
@@ -48,10 +52,14 @@ def func(plt, N):
     
 for plt in pellets:
     plt.drop_outliers(reference = plt.avg_spectra)
-    func(plt, N = 5)
+    func(plt, N = 4)
 
 Experiment = Research(*pellets, dirname = 'FResearch')
-Experiment.plot_avg_spectrum(names = '9', amount = 1)
+Experiment.plot_avg_spectrum(names = ['7', '18'], elements = 'B I')
+Experiment.plot_avg_spectrum(names = ['23','24', '50'], region = [840, 856])
+Experiment.plot_avg_spectrum(names = ['1', '4', '7', '28', '30', '32'], region = [204, 210])
+
+#Experiment.plot_avg_spectrum(names = ['28', '30', '32'], region = [190, 200])
 
 #tb3.outliers()  
     
@@ -77,4 +85,4 @@ new_data_rel_int, new_db_rel_int = tb1.compare(db_table = db.table, element = 'F
     #reescrever compare com slice_by_nearest
     #o efeito dopller no pico de HI está superando unc_delta.
     #N muito elevado está resultando em pontos diferentes com mesmo lambda após
- #round. É peciso rever isso. 
+    #round. É peciso rever isso. 

@@ -64,7 +64,7 @@ class Research:
                 notes.append(
                         self.annotations(row, float(hght), textdata)
                         )
-            layout = go.Layout(showlegend = False,
+            layout = go.Layout(showlegend = True,
                                annotations = notes)
             
         fig = go.Figure(data = traces, layout = layout)
