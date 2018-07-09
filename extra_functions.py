@@ -23,8 +23,11 @@ def remove_non_ascii(string):
         
     return ''.join(new_string)
 
-def iterable_non_ascii(iterable):
-    return ', '.join(remove_non_ascii(i) for i in iterable)
+def iterable_remove_non_ascii(iterable, ret = 'list'):
+    if ret == 'str':
+        return ', '.join(remove_non_ascii(i) for i in iterable)
+    elif ret == 'list':
+        return [remove_non_ascii(i) for i in iterable]
 
 def is_number(string):
     try:               float(string)

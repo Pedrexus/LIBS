@@ -8,9 +8,9 @@ Próximas implementações ao código:
 		3.1.2. comparar com int rel NIST.
 		3.1.3. sanar disputas de picos.
 	3.2. Tabela "Peaks (localized)":
-		3.2.1. Data visualization...
-		3.2.2. seleção de informação por elemento e/ou lambda.
-		3.2.3. Plot da seleção com plotly seguindo exp fis mod
+		3.2.1. Data visualization...                                        [~ok]
+		3.2.2. seleção de informação por elemento e/ou lambda.              [ok]
+		3.2.3. Plot da seleção com plotly seguindo exp fis mod              [ok]
 	3.3. Modelagem simples:
 		3.3.1. Quantidade de picos norm -> presença/ausência
 		3.3.2. Elementos presentes -> categoria

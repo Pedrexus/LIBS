@@ -150,11 +150,11 @@ class NIST( Constants ):
         return table
 
     @timing
-    def save(self, filename, compression = None):
+    def save(self, filename, compression=None):
         filename = ''.join([filename, '.json'])
         try:
             self.table.to_json(path_or_buf=filename, orient='records', double_precision=15,
-                               force_ascii=True, compression = compression)
+                               force_ascii=True, compression=compression)
             return True
         except Exception as x:
             print('An Error has happened. Details: {}'.format(x))
