@@ -17,8 +17,8 @@ import logging
 
 logging.Logger.root.setLevel('DEBUG')
 
-ubuntu = r'/home/pedro/PythonProjects/LIBS/data'
-windows = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data'
+ubuntu = r'/home/pedro/PythonProjects/LIBS/data\Pedro'
+windows = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\Pedro'
 
 """
 NIST(elements=['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
@@ -60,7 +60,7 @@ Experiment = Research(*pellets, dirname='FResearch')
 # Experiment.plot_avg_spectrum(names = ['23','24', '50'], region = [840, 856])
 # Experiment.plot_avg_spectrum(names = ['1', '4', '7', '28', '30', '32'], region = [204, 210])
 
-Experiment.plot_avg_spectrum(elementslist=db.elements, names = ['18', '21', '23', '25', '28', '30', '32', ])
+Experiment.plot_avg_spectrum(elementslist=db.elements, with_unknown=True)
 #Usando o plotly, é possível melhorar muit o plot, colocando botões, nos quais o usuário escolhe os elemento no html
 #e não no código python.
 # tb3.outliers()
@@ -87,4 +87,4 @@ new_data_rel_int, new_db_rel_int = tb1.compare(db_table = db.table, element = 'F
 # o efeito dopller no pico de HI está superando unc_delta.
 # N muito elevado está resultando em pontos diferentes com mesmo lambda após
 # round. É peciso rever isso.
-#mudar opcoes do peakutils
+# mudar opcoes do peakutils

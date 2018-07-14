@@ -43,8 +43,11 @@ class Research:
         return wrapper
 
     @repositioner
-    def plot_avg_spectrum(self, elementslist, **kwargs):
+    def plot_avg_spectrum(self, elementslist, with_unknown=False, **kwargs):
         elements = iterable_remove_non_ascii(elementslist)
+        elements.append('all')
+        if with_unknown:    elements.append('UNKNOWN')
+
         graphdata = self.plotly_layout(elements, **kwargs)
 
         fig = go.Figure(data=graphdata['traces'], layout=graphdata['layout'])
@@ -84,21 +87,28 @@ class Research:
 
             graphdata['traces'].append(trace)
 
-            magn_peaks_table = Magnifier(peaks_table)
+            magnifier_peaks_table = Magnifier(peaks_table)
+
+            # makes each element button data (including the 'all' button):
             for element in elementslist:
-                peaks_table = magn_peaks_table[element]
-
-                for row, height in plt.peaks_table[1].loc[peaks_table.index] \
-                        .iterrows():
-                    textdata = iterable_remove_non_ascii(
-                        plt.peaks_table[0][row],
-                        ret='str')
-
-                    graphdata['notes'][element].append(
-                        self.annotations(row, float(height), textdata)
-                    )
+                self.__element_annotation(magnifier_peaks_table,
+                                          plt.peaks_table[1],
+                                          graphdata, element)
 
         return graphdata
+
+    def __element_annotation(self, magnifier, heights, graphdata,
+                             element):
+        peaks_table = magnifier[element]
+
+        for row, height in heights.loc[peaks_table.index].iterrows():
+            textdata = iterable_remove_non_ascii(
+                magnifier.data[row], ret='str'
+            )
+
+            graphdata['notes'][element].append(
+                self.annotations(row, float(height), textdata)
+            )
 
     def plotly_layout(self, elementslist, **kwargs):
         graphdata = self.plotly_traces_and_notes(elementslist, **kwargs)
@@ -111,9 +121,9 @@ class Research:
 
         graphdata['layout'] = go.Layout(showlegend=True,
                                         updatemenus=self.updatemenus(
-                                                 buttons=graphdata['buttons']
-                                            )
-                                       )
+                                            buttons=graphdata['buttons']
+                                        )
+                                        )
 
         return graphdata
 
@@ -149,8 +159,8 @@ class Research:
                    'annotations': annotations}]
         )
 
-        #if not booleantraces:
-            #del button['args'][0]
+        # if not booleantraces:
+        # del button['args'][0]
 
         return button
 
