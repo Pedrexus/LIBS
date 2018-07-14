@@ -332,7 +332,7 @@ class Magnifier:
         
     def __getitem__(self, keys):
         """Magnifier['C I', 'Ti I'] -> all peaks with both possible elements."""
-        if keys == None: return self.__class__(self.data)
+        if keys == None or keys == 'all': return self.__class__(self.data)
         else:            
             if type(keys) == str:   keys = [keys] #review:  not pythonic.
             if keys == [('UNKNOWN',)]:
