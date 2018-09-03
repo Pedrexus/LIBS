@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Thu Jun  7 10:13:02 2018
 
@@ -104,7 +103,7 @@ class Research:
 
             if plt.name not in names: continue
 
-            data = plt.avg_spectrum
+            data = plt.avg_spectra
             peaks_table = plt.peaks_table[0]
 
             if bool(region):

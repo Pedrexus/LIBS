@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-#
 """
 Created on Mon Apr 30 12:20:27 2018
 
@@ -13,8 +12,6 @@ import itertools
 import copy
 from functools import wraps
 import logging, time
-
-from lmfit.models import LorentzianModel
 
 
 def remove_non_ascii(string):
@@ -132,13 +129,3 @@ def normalize(DataFrame, kind='min-max'):
         return (df - df.min()) / (df.max() - df.min())
     elif kind == 'mean':
         return (df - df.mean()) / df.std()
-
-"""
-def make_model(num):
-    pref = "f{0}_".format(num)
-    model = LorentzianModel(prefix = pref)
-    model.set_param_hint(pref+'amplitude', value=amplitude[num], min=0, max=5*amplitude[num])
-    model.set_param_hint(pref+'center', value=center[num], min=center[num]-0.5, max=center[num]+0.5)
-    model.set_param_hint(pref+'sigma', value=width[num], min=0, max=2)
-    return model
-"""

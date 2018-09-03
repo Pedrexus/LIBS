@@ -14,7 +14,10 @@ import peakutils as pu
 from scipy.interpolate import CubicSpline
 import extra_functions as xf
 import scipy.signal as signal
+<<<<<<< HEAD
 import lmfit.models as fitmodels
+=======
+>>>>>>> e8cb411e7eaf8b25bb7df41cb8636df21373b8f1
 
 
 class Pellet:
@@ -276,6 +279,7 @@ class Pellet:
         return df
 
     @property
+<<<<<<< HEAD
     def avg_spectrum(self):
         avg = self.spectrum.mean(axis=1)
         avg.name = 'avg_spectrum'
@@ -284,6 +288,14 @@ class Pellet:
     def peakutils(self, array, **kwargs):
         base = pu.baseline(array, deg=2, max_it=500, tol=0.0001)
         indexes = pu.indexes(array - base, thres=0.13, min_dist=2 * self.N)
+=======
+    def avg_spectra(self):
+        return self.spectrum.mean(axis=1)
+
+    def peakutils(self, array, **kwargs):
+        base = pu.baseline(array, deg=2, max_it=500, tol=0.0001)
+        indexes = pu.indexes(array - base, thres=0.13, min_dist=10 * self.N)
+>>>>>>> e8cb411e7eaf8b25bb7df41cb8636df21373b8f1
 
         return indexes
 
@@ -335,6 +347,7 @@ class Pellet:
         peaks_indexes, spta_peaks = self.peaks_in_spectra(self.avg_spectrum,
                                                           **kwargs)
         out_sptm = [s.avg_spectrum.loc[spta_peaks] for s in [self, *Pellets]]
+
         total_sptm = pd.concat(out_sptm, axis=1)
 
         corr_matrix = total_sptm.corr()
@@ -435,12 +448,21 @@ class Pellet:
         if kind == 'inversion':
             trimmed_sptum = {}
             for sample, spectrum in spectra.items():
+            samples = self.origsptum.columns
+        else:
+            samples = xf.build_iterable(spectra)
+
+        if kind == 'inversion':
+            trimmed_origsptum = {}
+            for sample in samples:
+                spectrum = self.origsptum[sample]
                 try:
                     trimmed_spectrum = self.confine_peak__by_inversion(
                         spectrum,
                         wavelength,
                         **kwargs)
                     trimmed_sptum[sample] = trimmed_spectrum
+                    trimmed_origsptum[sample] = trimmed_spectrum
                 except Exception as X:
                     logging.debug(
                         "Sample {} raised: ".format(sample) + X.args[0])
@@ -518,6 +540,7 @@ class Pellet:
                 mod = mod + this_mod
 
         return mod
+        return trimmed_origsptum
 
 
 class Magnifier:
