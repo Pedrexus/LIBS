@@ -15,10 +15,10 @@ from extra_functions import timing
 
 import logging
 
-logging.Logger.root.setLevel('DEBUG')
+logging.Logger.root.setLevel('WARNING')
 
 ubuntu = r'/home/pedro/PythonProjects/LIBS/data\Pedro'
-windows = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\Pedro'
+windows = r'C:\Users\Pedro\Google Drive\Iniciação Científica - EMBRAPA - 2017\Programas\LIBS\data\testsamples'
 
 """
 NIST(elements=['C I', 'B I', 'K I', 'P I', 'N I', 'H I', 'Cu I',
@@ -52,15 +52,22 @@ def func(plt, N):
 
 
 for plt in pellets:
-    plt.drop_outliers(reference=plt.avg_spectra)
+    plt.drop_outliers(reference=plt.avg_spectrum)
     func(plt, N=1)
 
 Experiment = Research(*pellets, dirname='FResearch')
+
+plt.plotfit(769.87)
+
+#print(plt.peakfit(777.5, model = 'gauss')['avg_spectrum'].fit_report())
+
+#tt_1 = Experiment.height_ttest(193.02)
+
 # Experiment.plot_avg_spectrum(names = ['7', '18'], elements = 'B I')
 # Experiment.plot_avg_spectrum(names = ['23','24', '50'], region = [840, 856])
 # Experiment.plot_avg_spectrum(names = ['1', '4', '7', '28', '30', '32'], region = [204, 210])
 
-Experiment.plot_avg_spectrum(elementslist=db.elements, with_unknown=True)
+#Experiment.plot_avg_spectrum(elementslist=db.elements, with_unknown=True)
 #Usando o plotly, é possível melhorar muit o plot, colocando botões, nos quais o usuário escolhe os elemento no html
 #e não no código python.
 # tb3.outliers()
@@ -88,3 +95,4 @@ new_data_rel_int, new_db_rel_int = tb1.compare(db_table = db.table, element = 'F
 # N muito elevado está resultando em pontos diferentes com mesmo lambda após
 # round. É peciso rever isso.
 # mudar opcoes do peakutils
+

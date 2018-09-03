@@ -4,8 +4,13 @@ Created on Thu Jun  7 10:13:02 2018
 
 @author: Pedro
 """
+import itertools
+
 import plotly.offline as py
 import plotly.graph_objs as go
+from pandas import DataFrame
+from scipy import stats
+
 from extra_functions import slice_by_inside_interval, iterable_remove_non_ascii
 from pellet import Magnifier
 import os
@@ -16,8 +21,9 @@ from collections import defaultdict
 class Research:
 
     def __init__(self, *args, dirname=''):
-        self.pellets = args
-        self.__names = tuple(plt.name for plt in self.pellets)
+        self.__research = {plt.name: plt for plt in args}
+        self.pellets = tuple(self.__research.values())
+        self.__names = tuple(self.__research.keys())
         self.makedirs(dirname)
 
     def __str__(self):
@@ -25,6 +31,33 @@ class Research:
 
     def __repr__(self):
         return 'Research' + str(self.__names)
+
+    def __getitem__(self, name):
+        return self.__research[name]
+
+
+
+    def height_ttest(self, wavelength, **kwargs):
+        plt_comb = itertools.combinations(self.__names, 2)
+
+        ttests = {}
+        for a, b in plt_comb:
+            key = '_'.join([a, b])
+
+            a_heights = [
+                sptum.loc[self[a][wavelength].name] for sptum in
+                self[a].confine_peak(wavelength, **kwargs).values()]
+            b_heights = [sptum.loc[self[b][wavelength].name] for sptum in
+                         self[b].confine_peak(wavelength, **kwargs).values()]
+
+            ttests[key] = stats.ttest_ind(a_heights, b_heights)
+
+        df = DataFrame(ttests, index=['statistic', 'pvalue']).T.sort_values(
+            'statistic')
+
+        return df
+
+
 
     def repositioner(func):
         """To be used as a decorator on functions requiring file management."""
@@ -71,7 +104,7 @@ class Research:
 
             if plt.name not in names: continue
 
-            data = plt.avg_spectra
+            data = plt.avg_spectrum
             peaks_table = plt.peaks_table[0]
 
             if bool(region):
